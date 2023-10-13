@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS user_has_roles (
 
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (role_id) REFERENCES roles(id)
-)
+);

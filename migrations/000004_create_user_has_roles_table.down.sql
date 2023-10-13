@@ -1,1 +1,1 @@
-DROP TABLE user_has_roles
+DROP TABLE user_has_roles;
