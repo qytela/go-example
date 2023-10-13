@@ -62,3 +62,22 @@ func UserEmailExists(email string, user *models.User) bool {
 	result := config.DB.Where("email = ?", email).First(&user)
 	return result.Error != gorm.ErrRecordNotFound
 }
+
+func AssignDefaultUserRole(user *models.User) error {
+	var defaultRole models.Role
+
+	if err := config.DB.Where("name = ?", "user").First(&defaultRole).Error; err != nil {
+		return err
+	}
+
+	userRoles := models.UserHasRoles{
+		UserID: user.ID,
+		RoleID: defaultRole.ID,
+	}
+
+	if err := config.DB.Create(&userRoles).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

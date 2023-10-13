@@ -58,6 +58,9 @@ func (u *AuthController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// Begin transaction
+	tx := config.DB.Begin()
+
 	var user models.User
 	user.Name = payload.Name
 	user.Email = payload.Email
@@ -65,18 +68,18 @@ func (u *AuthController) Register(ctx *gin.Context) {
 
 	if err := config.DB.Create(&user).Error; err != nil {
 		helpers.ErrorPanic(ctx, err)
+		tx.Rollback() // Rollback transaction
 		return
 	}
 
-	userRoles := models.UserHasRoles{
-		UserID: user.ID,
-		RoleID: 1,
-	}
-
-	if err := config.DB.Create(&userRoles).Error; err != nil {
+	if err := utils.AssignDefaultUserRole(&user); err != nil {
 		helpers.ErrorPanic(ctx, err)
+		tx.Rollback() // Rollback transaction
 		return
 	}
+
+	// Commit transaction
+	tx.Commit()
 
 	ctx.JSON(200, gin.H{
 		"status": true,
